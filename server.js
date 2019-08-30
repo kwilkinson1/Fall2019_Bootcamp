@@ -25,8 +25,8 @@ var requestHandler = function (request, response) {
       https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types
      */
     
-    console.log(request.method);
-    
+    // Test for the listings path and 'GET' method from the request
+    // The URL is already parsed in the skeleton code provided
     if (parsedUrl.path === '/listings' && request.method === 'GET') {
         // Don't really need to, but send 'OK' header
         response.writeHead(200);
