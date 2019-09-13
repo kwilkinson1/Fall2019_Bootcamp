@@ -14,8 +14,10 @@ var fs = require('fs'),
 //See https://docs.atlas.mongodb.com/driver-connection/
 mongoose.connect(config.db.uri, {useNewUrlParser: true,  useUnifiedTopology: true });
 
+// Create a connection to the database
 var db = mongoose.connection;
 
+// Console log verification that the database is connected
 db.once("open", () =>{
   console.log("Connection successful!");
 });
@@ -27,52 +29,44 @@ db.once("open", () =>{
   Remember that we needed to read in a file like we did in Bootcamp Assignment #1.
  */
 
-  // This parses the JSON file into JSON data for insertion into the database
-  //var listingData = JSON.parse(fs.readFileSync('listings.json', 'utf8'));
+  // First, use the fs to read the file and convert it into JSON data
+  // I made this function asynchronous, so the rest of the code will be
+  // able to be run if necessary.
+fs.readFile('listings.json', 'utf-8', (err, data) => {
 
-  var listing, buildings;
-  //First, create a function to read the file and convert it into JSON data
-  //I made this function synchronous, so that the data would be available 
-  //before attempting to connect to mongoDB
-  var data = fs.readFileSync('listings.json', 'utf-8');
     try {
       let listingData;
       
       // Use JSON.parse to convert file into JSON object
-      listingData = JSON.parse(data);
+     listingData = JSON.parse(data);
           
-      // Iterate through the listingData to use the schema to model the 
-      // data prior to adding to mongoDB
-      for (let i = 0; i < listingData.entries.length; i++) {
-        let building = new Listing(listingData.entries[i]);
+      // Iterate through the listingData entries using forEach
+        listingData.entries.forEach((listing) => {
         
-        // Add each building to mongoDB using mongoose
-        Listing.create(building, function(err, doc){
-          if (err) {
-            return console.error(err.message);
-          }
-          console.log(doc);
-          return db.close;
+          // Verify each listing is properly formatted by creating new
+          // objects with Listing schema
+          let building = new Listing(listing);
+          
+          // Add each building to mongoDB using mongoose
+          Listing.create(building, function(err, doc){
+            // Return error if there is any
+            if (err) {
+              return console.error(err.message);
+            }
+            // Return the completed message if uploaded successfully
+            console.log(`${doc.name} was added to database!`);
+            return db.close;
+          })
         })
-      }
-      //console.log(listingData.entries[0]);
-      
+
+        
     } catch (err) {
+
       console.error(err.message);
       process.exit(1);
     }
+  })
   
-  
-  /*async function insertListings() {
-    try {
-      await db.insertMany(listingData);
-      console.log('Finished updating!');
-      process.exit();
-    } catch (err) {
-      console.error(err.message);
-      process.exit(1);
-    }
-  }*/
 
 /*  
   Check to see if it works: Once you've written + run the script, check out your MongoLab database to ensure that 
